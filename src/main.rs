@@ -1,18 +1,11 @@
+mod todo;
+use todo::TodoCollection;
+
 use eframe::egui;
-use eframe::egui::{CentralPanel, Label, RichText, ScrollArea};
+use eframe::egui::{CentralPanel, Checkbox, Label, RichText, ScrollArea};
 
-struct Todos     {
-    todo_items: Vec<Todo>,
-}
-
-struct Todo {
-    headline: String,
-    description: String,
-    is_complete: bool,
-}
-#[derive(Default)]
 struct TodoApp {
-    todo_items: Vec<Todo>,
+    todo_items: TodoCollection,
 }
 
 impl TodoApp {
@@ -22,21 +15,21 @@ impl TodoApp {
         // Use the cc.gl (a glow::Context) to create graphics shaders and buffers that you can use
         // for e.g. egui::PaintCallback.
         // Self::default()
-        let iter = (0..20).map(|a| Todo {
-            headline: format!("title-{}", a),
-            description: format!("desc...{}", a),
-            is_complete: a % 2 == 0,
-        });
+        let mut todo_collection = TodoCollection::new("./todos.json");
         Self {
-            todo_items: Vec::from_iter(iter),
+            todo_items: todo_collection,
         }
     }
 
     fn render_todo_list(&self, ui: &mut eframe::egui::Ui){
-        for t in &self.todo_items{
+        for mut t in self.todo_items.get(){
             let headline =
-                Label::new(RichText::new(&t.headline).text_style(eframe::egui::TextStyle::Button));
+                Label::new(RichText::new(&t.headline).text_style(egui::TextStyle::Button));
+            let description = Label::new(RichText::new(&t.description).text_style(egui::TextStyle::Button));
+            let is_complete = Checkbox::new(&mut t.is_complete, "complete");
             ui.add(headline);
+            ui.add(description);
+            ui.add(is_complete);
         }
     }
 }
