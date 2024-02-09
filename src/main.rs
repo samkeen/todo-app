@@ -2,7 +2,7 @@ mod todo;
 use todo::TodoCollection;
 
 use eframe::egui;
-use eframe::egui::{CentralPanel, Checkbox, Label, RichText, ScrollArea};
+use eframe::egui::{CentralPanel, Checkbox, Label, RichText, ScrollArea, TextEdit};
 
 struct TodoApp {
     todo_items: TodoCollection,
@@ -23,13 +23,15 @@ impl TodoApp {
 
     fn render_todo_list(&self, ui: &mut eframe::egui::Ui){
         for mut t in self.todo_items.get(){
-            let headline =
-                Label::new(RichText::new(&t.headline).text_style(egui::TextStyle::Button));
+            let headline = TextEdit::singleline(&mut t.headline);
             let description = Label::new(RichText::new(&t.description).text_style(egui::TextStyle::Button));
             let is_complete = Checkbox::new(&mut t.is_complete, "complete");
-            ui.add(headline);
-            ui.add(description);
-            ui.add(is_complete);
+            ui.horizontal(|ui| {
+                ui.add(headline);
+                ui.add(description);
+                ui.add(is_complete);
+            });
+
         }
     }
 }
@@ -51,9 +53,7 @@ impl eframe::App for TodoApp {
 
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Todo");
-            let mut todo_desc: String = String::from("");
-            ui.text_edit_multiline(&mut todo_desc);
+            ui.heading("Todos");
             ScrollArea::vertical().show(ui, |ui| {
                 self.render_todo_list(ui);
             });
